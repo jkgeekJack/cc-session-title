@@ -9,9 +9,29 @@ HOOKS_DIR="$CLAUDE_DIR/hooks"
 SKILLS_DIR="$CLAUDE_DIR/skills"
 SETTINGS="$CLAUDE_DIR/settings.json"
 
-REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-
 err() { echo "ERROR: $*" >&2; exit 1; }
+
+# Resolve REPO_ROOT. When invoked via `curl … | bash`, BASH_SOURCE[0] is
+# unset (or empty) and we have no sibling assets to install from — in that
+# case bootstrap by cloning the repo into a tempdir and re-running.
+src="${BASH_SOURCE[0]:-}"
+if [[ -n "$src" ]]; then
+    REPO_ROOT="$(cd "$(dirname "$src")" && pwd)"
+else
+    REPO_ROOT=""
+fi
+
+if [[ -z "$REPO_ROOT" || ! -f "$REPO_ROOT/hooks/cc-session-title.sh" ]]; then
+    command -v git >/dev/null 2>&1 || err "git not found — required for remote install."
+    repo_url="${CC_SESSION_TITLE_REPO:-https://github.com/jkgeekJack/cc-session-title.git}"
+    repo_ref="${CC_SESSION_TITLE_REF:-main}"
+    tmp="$(mktemp -d -t cc-session-title)"
+    trap 'rm -rf "$tmp"' EXIT
+    echo "Fetching $repo_url@$repo_ref …" >&2
+    git clone --depth 1 --branch "$repo_ref" "$repo_url" "$tmp" >&2
+    bash "$tmp/install.sh" "$@"
+    exit $?
+fi
 
 command -v plutil  >/dev/null 2>&1 || err "plutil not found — this installer targets macOS."
 command -v python3 >/dev/null 2>&1 || err "python3 not found. Install Xcode CLT: xcode-select --install"

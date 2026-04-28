@@ -27,17 +27,45 @@ Kitty, WezTerm, Ghostty, tmux with `set -g set-titles on`, etc.
 
 ## Install
 
+### Option A — one-liner (terminal or Claude Code's Bash)
+
+Paste anywhere a shell runs (your terminal, or Claude Code's Bash tool):
+
 ```bash
+curl -fsSL https://raw.githubusercontent.com/jkgeekJack/cc-session-title/main/install.sh | bash
+```
+
+The installer auto-bootstraps: when run via `curl | bash` it has no
+sibling assets, so it `git clone`s itself into a tempdir and re-execs.
+
+### Option B — paste into Claude Code chat
+
+Drop this single block into the Claude Code prompt and hit enter — Claude
+will run the installer and report back:
+
+> Install the cc-session-title hook + skill from
+> https://github.com/jkgeekJack/cc-session-title by running:
+> `curl -fsSL https://raw.githubusercontent.com/jkgeekJack/cc-session-title/main/install.sh | bash`
+> Then verify `~/.claude/hooks/cc-session-title.sh` exists, confirm the
+> `UserPromptSubmit` hook and `CLAUDE_CODE_DISABLE_TERMINAL_TITLE=1` env
+> entry landed in `~/.claude/settings.json`, and tell me to restart any
+> open Claude Code session.
+
+### Option C — clone and run
+
+```bash
+git clone https://github.com/jkgeekJack/cc-session-title.git
+cd cc-session-title
 ./install.sh
 ```
 
 Restart any open Claude Code session. The next session's first prompt will
 trigger localized title generation.
 
-To remove:
+To remove (works as one-liner too — `uninstall.sh` is self-contained):
 
 ```bash
-./uninstall.sh
+curl -fsSL https://raw.githubusercontent.com/jkgeekJack/cc-session-title/main/uninstall.sh | bash
 ```
 
 The installer takes a `settings.json.bak.<ts>` snapshot, is idempotent
